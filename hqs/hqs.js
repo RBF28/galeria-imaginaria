@@ -12,7 +12,7 @@ hqs.push({
     nome: "Cartunia! (2025)",
     capa: "https://files.catbox.moe/vkxuil.png",
     tipo: "hq",
-    sinopse: "Tudo começa em Salvador, quando o impossível passa a rir e a realidade começa a se distorcer. Belto Santos e Araun Brito descobrem o Mady, uma energia que nasce do humor de cada usuário. Mas o caos cartunesco não se limita ao Brasil. Ele se espalha pelo mundo, atravessando continentes… até alcançar forças muito maiores escondidas no Norte da África.",
+    sinopse: "Em Cartunia, um mundo onde a imaginação não tem limites, Bluper Dooble e Lolly Fluff vivem aventuras malucas cheias de humor e caos cartunesco. Entre coisas exageradas, desafios absurdos e vilões excêntricos, a única regra é se divertir!",
     link: "https://fliptru.com.br/comic/cartunia",
     novo: ""
 });
@@ -21,7 +21,7 @@ hqs.push({
     nome: "Cartuneiros! The Crazy Jornadas (2026)",
     capa: "https://files.catbox.moe/akllrb.png",
     tipo: "hq",
-    sinopse: "Em Cartunia, um mundo onde a imaginação não tem limites, Bluper Dooble e Lolly Fluff vivem aventuras malucas cheias de humor e caos cartunesco. Entre coisas exageradas, desafios absurdos e vilões excêntricos, a única regra é se divertir!",
+    sinopse: "Tudo começa em Salvador, quando o impossível passa a rir e a realidade começa a se distorcer. Belto Santos e Araun Brito descobrem o Mady, uma energia que nasce do humor de cada usuário. Mas o caos cartunesco não se limita ao Brasil. Ele se espalha pelo mundo, atravessando continentes… até alcançar forças muito maiores escondidas no Norte da África",
     link: "https://fliptru.com.br/comic/cartuneiros-the-crazy-jornadas",
     novo: "RENA"
 });
