@@ -1,7 +1,7 @@
 // Living_in_space.js - Versão 3.5 (Dados Puros)
 series.push({
   nome: "Living in Space (2023)",
-  capa: "https://files.catbox.moe/a06o7t.png",
+  capa: "https://files.catbox.moe/2yw2xg.png",
   tipo: "serie",
   aviso: {
     ativo: true,
