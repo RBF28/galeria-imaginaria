@@ -10,8 +10,8 @@ series.push({
     {
       nome: "Temporada 1",
       episodios: [
-        { nome: "Ep 01", link: "https://link-do-ep1.mp4", novo: true },
-        { nome: "Ep 02", link: "https://link-do-ep2.mp4", novo: true }
+        { nome: "Ep 01", link: "https://link-do-ep1.mp4", novo: false },
+        { nome: "Ep 02", link: "https://link-do-ep2.mp4", novo: "RENA" }
       ]
     }
   ]
