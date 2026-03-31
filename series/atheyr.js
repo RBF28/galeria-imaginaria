@@ -1,6 +1,6 @@
 series.push({
   nome: "Atheyr: A Super Separação Cósmica (2025)",
-  capa: "https://link-da-capa.png",
+  capa: "https://files.catbox.moe/648thp.png",
   tipo: "serie",
   aviso: {
     ativo: true,
