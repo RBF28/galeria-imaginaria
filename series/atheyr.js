@@ -1,5 +1,5 @@
 series.push({
-  nome: "Atheyr: A Super Separação Cósmica 🌌",
+  nome: "Atheyr: A Super Separação Cósmica (2025)",
   capa: "https://link-da-capa.png",
   tipo: "serie",
   aviso: {
@@ -10,8 +10,8 @@ series.push({
     {
       nome: "Temporada 1",
       episodios: [
-        { nome: "Ep 01 - O Início do Caos", link: "https://link-do-ep1.mp4", novo: true },
-        { nome: "Ep 02 - Fragmentos do Nexus", link: "https://link-do-ep2.mp4", novo: true }
+        { nome: "Ep 01", link: "https://link-do-ep1.mp4", novo: true },
+        { nome: "Ep 02", link: "https://link-do-ep2.mp4", novo: true }
       ]
     }
   ]
