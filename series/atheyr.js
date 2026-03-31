@@ -11,7 +11,8 @@ series.push({
       nome: "Temporada 1",
       episodios: [
         { nome: "Ep 01", link: "https://files.catbox.moe/b1wcl3.mp4", novo: false },
-        { nome: "Ep 02", link: "https://files.catbox.moe/sk1l7g.mp4", novo: "RENA" }
+        { nome: "Ep 02", link: "https://files.catbox.moe/sk1l7g.mp4", novo: "RENA" },
+        { nome: "Ep 03", link: "https://files.catbox.moe/lq5fq4.mp4", novo: "RENA" }
       ]
     }
   ]
