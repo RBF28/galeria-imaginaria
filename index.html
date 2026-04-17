@@ -6,10 +6,33 @@
     <title>Galeria Imaginária v5.0</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Bubblegum+Sans&display=swap" rel="stylesheet">
+    <style>
+        body { transition: background 0.6s ease; }
+        body.player-ativo { background: #000 !important; }
+        body.player-ativo .titulo,
+        body.player-ativo .menuPrincipal,
+        body.player-ativo #bannerPrincipal,
+        body.player-ativo #sobreSite,
+        body.player-ativo #aviso { opacity: 0.15; transition: opacity 0.5s ease; }
+        .titulo, .menuPrincipal, #bannerPrincipal, #sobreSite, #aviso { transition: opacity 0.5s ease; }
+    </style>
 </head>
 <body id="corpoSite">
 
-<h1 class="titulo">Galeria Imaginária</h1>
+<h1 class="titulo" onclick="mostrarSobre()" style="cursor:pointer;">Galeria Imaginária</h1>
+
+<div id="sobreSite" style="
+    display:none;
+    text-align:center;
+    max-width:600px;
+    margin:10px auto;
+    color:#aaa;
+    font-size:14px;
+    line-height:1.6;
+">
+    Esse site existe pra salvar minhas animações antes que elas sumam no vazio da internet 💀<br>
+    Também funciona como um arquivo vivo da minha jornada como animador.
+</div>
 
 <div style="text-align: center;">
     <img src="https://files.catbox.moe/gpcj2s.png" class="banner" id="bannerPrincipal" alt="Banner Principal">
@@ -23,6 +46,9 @@
     <button class="btn btn-menu" onclick="renderizarCatalogo('favoritos')">❤️ Favoritos</button>
     <button class="btn btn-menu" onclick="renderizarCatalogo('em_alta')">🔥 Em Alta</button>
     <button class="btn btn-menu" onclick="renderizarCatalogo('melhores')">🌟 Melhores</button>
+    <button class="btn btn-menu" onclick="renderizarCatalogo('lost_media')">🕳️ Lost Media</button>
+    <button class="btn btn-menu" onclick="renderizarCatalogo('recentes')">📅 Recentes</button>
+    <button class="btn btn-menu" onclick="renderizarCatalogo('recomendado')">🎯 Recomendado</button>
     <button class="btn btn-menu" onclick="abrirExtras()">Extras</button>
 </div>
 
@@ -48,6 +74,8 @@
         </div>
 
         <img id="capaGrande" class="capaGrande" src="" alt="Capa">
+
+        <p id="sinopseTexto" style="text-align:center; color:#ccc; max-width:600px; margin:10px auto;"></p>
 
         <!-- Área HQ -->
         <div id="areaHQ" style="display:none; text-align:center; padding:20px;">
@@ -109,111 +137,27 @@
 <script src="hqs/hqs.js"></script>
 <script src="series/extras.js"></script>
 
-<!-- 3. FIREBASE -->
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-    const firebaseConfig = {
-        apiKey: "YOUR_API_KEY_HERE",
-        authDomain: "galeria-imaginaria-b1d1c.firebaseapp.com",
-        projectId: "galeria-imaginaria-b1d1c",
-        storageBucket: "galeria-imaginaria-b1d1c.firebasestorage.app",
-        messagingSenderId: "826511324818",
-        appId: "YOUR_APP_ID_HERE"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db  = getFirestore(app);
-
-    // Gera um ID seguro a partir do link
-    function linkParaId(link) {
-        return btoa(unescape(encodeURIComponent(link))).replace(/\//g, '_').replace(/=/g, '-');
+<!-- 3. AVALIAÇÃO LOCAL + GLOBAIS -->
+<script>
+    function mostrarSobre() {
+        const el = document.getElementById("sobreSite");
+        el.style.display = (el.style.display === "none") ? "block" : "none";
     }
 
-    // +1 view no Firebase quando um vídeo é aberto
-    window.registrarView = async (link) => {
-        if (!link) return;
-        const ref = doc(db, "estatisticas", linkParaId(link));
-        try {
-            const snap = await getDoc(ref);
-            await setDoc(ref, { views: (snap.exists() ? snap.data().views : 0) + 1 }, { merge: true });
-        } catch (e) { console.error("Erro ao registrar view:", e); }
-    };
-
-    // Busca rankings de Em Alta ou Melhores Avaliados
-    window.getRankings = async (tipo) => {
-        const coll = tipo === 'em_alta' ? 'estatisticas' : 'avaliacoes';
-        try {
-            const snap = await getDocs(collection(db, coll));
-            let dados = [];
-            snap.forEach(d => {
-                try {
-                    const link = decodeURIComponent(escape(atob(d.id.replace(/_/g, '/').replace(/-/g, '='))));
-                    const val  = tipo === 'em_alta'
-                        ? (d.data().views || 0)
-                        : (d.data().total || 0) / (d.data().votos || 1);
-                    dados.push({ link, val });
-                } catch (_) {}
-            });
-            return dados.sort((a, b) => b.val - a.val);
-        } catch (e) {
-            console.error("Erro ao buscar rankings:", e);
-            return [];
-        }
-    };
-
-    // Avalia o conteúdo atual com estrelas (1-5)
-    // Usa linkAtual em vez de player.src para funcionar em todos os tipos
-    window.avaliar = async (estrelas) => {
+    window.avaliar = (nota) => {
         const link = window.linkAtual;
-        if (!link || jaReagiu[link]) return;
-        const ref = doc(db, "avaliacoes", linkParaId(link));
-        try {
-            const snap = await getDoc(ref);
-            if (!snap.exists()) {
-                await setDoc(ref, { total: estrelas, votos: 1 });
-            } else {
-                await setDoc(ref, {
-                    total: snap.data().total + estrelas,
-                    votos: snap.data().votos + 1
-                }, { merge: true });
-            }
-            jaReagiu[link] = true;
-            // Feedback visual: desabilita os botões após avaliar
-            document.querySelectorAll('#estrelasContainer button').forEach(b => {
-                b.disabled = true;
-                b.style.opacity = '0.4';
-            });
-            window.atualizarNota(link);
-        } catch (e) { console.error("Erro ao avaliar:", e); }
-    };
-
-    // Atualiza o texto da nota na tela
-    window.atualizarNota = async (link) => {
         if (!link) return;
-        const label = document.getElementById("notaAtual");
-        if (!label) return;
-        label.innerText = "Buscando nota...";
-        try {
-            const snap = await getDoc(doc(db, "avaliacoes", linkParaId(link)));
-            if (!snap.exists()) {
-                label.innerText = "Sem avaliações ainda. Seja o primeiro!";
-            } else {
-                const media = (snap.data().total / snap.data().votos).toFixed(1);
-                label.innerText = `Nota: ${media}/5 ★ (${snap.data().votos} avaliações)`;
-            }
-            // Se o usuário já avaliou este conteúdo, desabilita os botões
-            if (jaReagiu[link]) {
-                document.querySelectorAll('#estrelasContainer button').forEach(b => {
-                    b.disabled = true;
-                    b.style.opacity = '0.4';
-                });
-            }
-        } catch (e) { console.error("Erro ao buscar nota:", e); }
-    };
 
-    console.log("🔥 Firebase 5.0 On!");
+        localStorage.setItem("nota_" + link, nota);
+
+        document.getElementById("notaAtual").innerText =
+            "Sua nota: " + nota + "/5 ⭐";
+
+        document.querySelectorAll('#estrelasContainer button').forEach(b => {
+            b.disabled = true;
+            b.style.opacity = '0.4';
+        });
+    };
 </script>
 
 <!-- 4. LÓGICA PRINCIPAL -->
@@ -251,12 +195,21 @@ document.addEventListener("DOMContentLoaded", () => {
     function ativarReacoes(link) {
         const area = document.getElementById("areaReacoes");
         area.style.display = "block";
-        // Reabilita os botões para o novo conteúdo
-        document.querySelectorAll('#estrelasContainer button').forEach(b => {
-            b.disabled = false;
-            b.style.opacity = '1';
-        });
-        if (window.atualizarNota) window.atualizarNota(link);
+
+        const notaSalva = localStorage.getItem("nota_" + link);
+        if (notaSalva) {
+            document.getElementById("notaAtual").innerText = "Sua nota: " + notaSalva + "/5 ⭐";
+            document.querySelectorAll('#estrelasContainer button').forEach(b => {
+                b.disabled = true;
+                b.style.opacity = '0.4';
+            });
+        } else {
+            document.getElementById("notaAtual").innerText = "Avalie este conteúdo!";
+            document.querySelectorAll('#estrelasContainer button').forEach(b => {
+                b.disabled = false;
+                b.style.opacity = '1';
+            });
+        }
     }
 
     // ─── RENDERIZAR CATÁLOGO ─────────────────────────────────────────────────
@@ -280,31 +233,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } else if (filtro === 'em_alta') {
             txtSecao.innerText = "🔥 Em Alta";
-            const rankings = await window.getRankings('em_alta');
-            rankings.forEach(r => {
-                const achado = todosItens().find(i =>
-                    i.link === r.link ||
-                    (i.temporadas && i.temporadas.some(t => t.episodios.some(e => e.link === r.link)))
-                );
-                if (achado && !listaFinal.includes(achado)) listaFinal.push(achado);
-            });
-            if (listaFinal.length === 0) {
-                grid.innerHTML = '<p style="color:#555; text-align:center; padding:40px;">Nenhum conteúdo assistido ainda. Começa por aí!</p>';
-                return;
-            }
+            grid.innerHTML = '<p style="color:#555; text-align:center; padding:40px;">This section is currently unavailable.</p>';
+            return;
 
         } else if (filtro === 'melhores') {
             txtSecao.innerText = "🌟 Melhores Avaliados";
-            const rankings = await window.getRankings('melhores');
-            rankings.forEach(r => {
-                const achado = todosItens().find(i =>
-                    i.link === r.link ||
-                    (i.temporadas && i.temporadas.some(t => t.episodios.some(e => e.link === r.link)))
-                );
-                if (achado && !listaFinal.includes(achado)) listaFinal.push(achado);
-            });
+            grid.innerHTML = '<p style="color:#555; text-align:center; padding:40px;">This section is currently unavailable.</p>';
+            return;
+
+        } else if (filtro === 'lost_media') {
+            txtSecao.innerText = "🕳️ Lost Media";
+            listaFinal = todosItens().filter(i => i.tipo === 'lost_media');
             if (listaFinal.length === 0) {
-                grid.innerHTML = '<p style="color:#555; text-align:center; padding:40px;">Nenhum conteúdo avaliado ainda. Assista e avalie!</p>';
+                grid.innerHTML = '<p style="color:#555; text-align:center; padding:40px;">Projetos esquecidos no tempo... 💀</p>';
+                return;
+            }
+
+        } else if (filtro === 'recentes') {
+            txtSecao.innerText = "📅 Recentes";
+            listaFinal = todosItens()
+                .filter(i => i.data)
+                .sort((a, b) => b.data.localeCompare(a.data));
+            if (listaFinal.length === 0) {
+                grid.innerHTML = '<p style="color:#555; text-align:center; padding:40px;">Nenhum conteúdo com data cadastrada ainda.</p>';
+                return;
+            }
+
+        } else if (filtro === 'recomendado') {
+            txtSecao.innerText = "🎯 Recomendado";
+            const vistos = todosItens().filter(i => {
+                if (i.link) return estaVisto(i.link);
+                if (i.temporadas) return i.temporadas.some(t => t.episodios.some(e => estaVisto(e.link)));
+                return false;
+            });
+            const tiposVistos = [...new Set(vistos.map(i => i.tipo))];
+            const naoVistos = todosItens().filter(i => {
+                const visto = i.link ? estaVisto(i.link)
+                    : i.temporadas ? i.temporadas.some(t => t.episodios.some(e => estaVisto(e.link)))
+                    : false;
+                return !visto && tiposVistos.includes(i.tipo) && !favs.includes(i.nome);
+            });
+            listaFinal = naoVistos.length > 0 ? naoVistos : todosItens().filter(i => tiposVistos.includes(i.tipo));
+            if (listaFinal.length === 0 || tiposVistos.length === 0) {
+                grid.innerHTML = '<p style="color:#555; text-align:center; padding:40px;">Assista algo para receber recomendações 👀</p>';
                 return;
             }
 
@@ -364,6 +335,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("videoSource").src = link;
         player.load();
         document.getElementById("epAtual").innerText = "▶ Assistindo: " + nome;
+        document.body.classList.add("player-ativo");
 
         player.onloadedmetadata = () => {
             const tempoSalvo = parseFloat(localStorage.getItem("tempo_" + link)) || 0;
@@ -371,7 +343,6 @@ document.addEventListener("DOMContentLoaded", () => {
             player.play();
         };
 
-        if (window.registrarView) window.registrarView(link);
         ativarReacoes(link);
 
         // Atualiza os badges de visto na lista de episódios
@@ -470,6 +441,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("gridPrincipal").style.display = "none";
         document.getElementById("telaEpisodios").style.display = "block";
         document.getElementById("capaGrande").src = serie.capa;
+        document.getElementById("sinopseTexto").innerText = serie.sinopse || "";
         document.getElementById("areaHQ").style.display = "none";
         document.getElementById("playerArea").style.display = "none";
         document.getElementById("areaReacoes").style.display = "none";
@@ -528,8 +500,9 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("gridPrincipal").style.display = "none";
         document.getElementById("telaEpisodios").style.display = "block";
         document.getElementById("capaGrande").src = hq.capa;
+        document.getElementById("sinopseTexto").innerText = "";
         document.getElementById("areaHQ").style.display = "block";
-        document.getElementById("sinopseHQ").innerText = hq.sinopse;
+        document.getElementById("sinopseHQ").innerText = hq.sinopse || "";
         document.getElementById("linkHQ").href = hq.link;
         document.getElementById("playerArea").style.display = "none";
         document.getElementById("listaEps").innerHTML = "";
@@ -537,13 +510,13 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("epAtual").innerText = "";
         atualizarBotaoFav(hq.nome);
         ativarReacoes(hq.link);
-        if (window.registrarView) window.registrarView(hq.link);
     };
 
     window.abrirFilme = (filme) => {
         document.getElementById("gridPrincipal").style.display = "none";
         document.getElementById("telaEpisodios").style.display = "block";
         document.getElementById("capaGrande").src = filme.capa;
+        document.getElementById("sinopseTexto").innerText = filme.sinopse || "";
         document.getElementById("areaHQ").style.display = "none";
         document.getElementById("avisoEtario").innerText =
             (filme.aviso && filme.aviso.texto) ? filme.aviso.texto : "";
@@ -555,6 +528,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("gridPrincipal").style.display = "none";
         document.getElementById("telaEpisodios").style.display = "block";
         document.getElementById("capaGrande").src = "https://files.catbox.moe/jj59ob.png";
+        document.getElementById("sinopseTexto").innerText = "";
         document.getElementById("areaHQ").style.display = "none";
         document.getElementById("playerArea").style.display = "none";
         document.getElementById("areaReacoes").style.display = "none";
@@ -589,6 +563,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.voltar = () => {
         player.pause();
         window.linkAtual = '';
+        document.body.classList.remove("player-ativo");
         document.getElementById("telaEpisodios").style.display = "none";
         document.getElementById("gridPrincipal").style.display = "";
         document.getElementById("btnFavDestaque").style.display = "";
